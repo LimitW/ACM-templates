@@ -1,0 +1,77 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+#define LL long long
+#define pii pair<int,int>
+
+const int INF = 0x3f3f3f3f;
+const int mod = 1e9 + 7;
+
+//lcm(C(N,0),C(N,1)....C(N,N) = lcm(1,2,..n+1)/(n+1)
+
+LL f[maxn];
+int p[maxn];
+
+LL quickpow(LL a, LL b){
+	LL ans = 1, tmp = a;
+	while(b > 0){
+		if(b & 1) ans = ans * tmp % mod;
+		tmp = tmp * tmp % mod;
+		b >>= 1;
+	}
+	return ans;
+}
+
+// ax % m = 1
+// if and only if gcd(a,m) = 1, x exists.
+
+// Fermat theory
+// a^(p-1) % p = 1
+// mod is a prime number
+LL inv(LL a){
+	return quickpow(a, mod-2);
+}
+
+//exgcd solution
+// ax + by = gcd(a,b)
+// x = inv(a,b), y = inv(b,a)
+void exgcd(LL a, LL b, LL& d, LL& x, LL& y){
+	if(!b) { d = a; x = 1; y = 0; }
+	else { exgcd(b,a%b,d,y,x); y -= x*(a/b); }
+}
+
+LL inv2(LL a){
+	LL b = mod, d, x, y;
+	exgcd(a, b, d, x, y);
+	return x < 0 ? x + mod : x;
+}
+
+void solve(){
+	for(int i = 2; i < maxn; ++i) p[i] = i;
+	for(int i = 2; i < maxn; ++i){
+		if(p[i] != i) continue;
+		for(int j = 2; j * i < maxn; ++j){
+			p[i*j] = i;
+		}
+	}
+	f[1] = 1;
+	for(int i = 2; i < maxn; ++i){
+		int tmp = i;
+		while(tmp % p[i] == 0 && tmp > 1) tmp /= p[i];
+		if(tmp == 1) f[i] = f[i-1] * p[i] % mod;
+		else f[i] = f[i-1];
+	}
+}
+
+int main(){
+	solve();
+	int T; scanf("%d", &T);
+	while(T--){
+		int n; scanf("%d", &n);
+		++n;
+		printf("%d\n", (int)(f[n] * inv2(n) % mod));
+	}
+    return 0;
+}
+

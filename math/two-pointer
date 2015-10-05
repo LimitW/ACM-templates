@@ -1,0 +1,41 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+#define LL long long
+#define pii pair<int,int>
+
+const int INF = 0x3f3f3f3f;
+const int mod = 1e9 + 7;
+const int maxn = 1e5 + 3;
+
+int a[maxn], p[40];
+LL sum[maxn];
+
+int main(){
+	int T; scanf("%d", &T);
+	for(int kase = 0; kase < T; ++kase){
+		int n; scanf("%d", &n);
+		sum[0] = 0;
+		memset(p, 0, sizeof(p));
+		for(int i = 1; i <= n; ++i){
+			scanf("%d", &a[i]);
+			sum[i] = sum[i-1] + (LL)(a[i]);
+		}
+		LL ans = 0;
+		for(LL i = 1; i <= n; ++i){
+			for(LL j = 2, v = 1; j <= sum[n]; j <<= 1, ++v){
+				while(sum[i] - sum[p[v-1]] >= j) ++p[v-1];
+			}
+			for(LL v = 0; ; ++v){
+				LL x = p[v] + 1, y = i;
+				if(v) y = p[v-1];
+				ans += (v + 1) * ((x + y) * (y - x + 1) / 2 + i * (y - x + 1));
+				if(!p[v]) break;
+			}
+		}
+		cout << ans << '\n';
+	}
+	return 0;
+}
+

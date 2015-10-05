@@ -1,0 +1,40 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+struct edge{
+	int nxt,to;
+}e[200010];
+
+int head[100010] , c = 0 , ans = 0;
+
+void addedge(int u,int v){
+	e[++c].to = v;
+	e[c].nxt = head[u];
+	head[u] = c;
+}
+
+int dfs(int u,int fa){
+	int first = 0 , second = 0;
+	for(int i = head[u]; i != -1; i = e[i].nxt){
+		if(e[i].to != fa){
+			int t = dfs(e[i].to,u) + 1;
+			if(t > first) { second = first; first = t; }
+			else if(t > second) second = t;
+		}
+	}
+	ans = max(ans,first+second);
+	return first;
+}//无根树转有根树同时求直径。first为子树中最长路，second为次长路。
+
+int main(){
+	memset(head,-1,sizeof(head));
+	int n; scanf("%d",&n);
+	for(int i = 1; i < n; i++){
+		int u,v; scanf("%d%d",&u,&v);
+		addedge(u,v); addedge(v,u);
+	}
+	dfs(1,-1);
+	printf("%d\n",ans);
+	return 0;
+}

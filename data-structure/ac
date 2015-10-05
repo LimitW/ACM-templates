@@ -1,0 +1,110 @@
+//AC Automaton
+#include <iostream>
+#include <cstring>
+#include <cstdio>
+#include <cstdlib>
+#include <cctype>
+#include <cmath>
+#include <string>
+#include <vector>
+#include <list>
+#include <map>
+#include <set>
+#include <queue>
+#include <stack>
+#include <utility>
+#include <bitset>
+#include <algorithm>
+
+using namespace std;
+
+#define LL long long
+#define pii pair<int,int>
+
+const int INF = 0x3f3f3f3f;
+const LL INFL = 0x3f3f3f3f3f3f3f3fLL;
+const int mod = 1e9 + 7;
+const int maxn = 1e6 + 4;
+
+struct Trie {
+    int next[maxn][26], fail[maxn], end[maxn];
+    int root, L;
+    int newnode(){
+        for(int i = 0;i < 26;i++)
+            next[L][i] = -1;
+        end[L++] = 0;
+        return L-1;
+    }
+    void init(){
+        L = 0;
+        root = newnode();
+    }
+    void insert(char* s){
+        int len = strlen(s);
+        int now = root;
+        for(int i = 0; i < len; i++){
+            if(next[now][s[i]-'a'] == -1)
+                next[now][s[i]-'a'] = newnode();
+            now = next[now][s[i]-'a'];
+        }
+        end[now]++;
+    }
+    void build(){
+        queue<int> Q;
+        fail[root] = root;
+        for(int i = 0; i < 26; i++)
+            if(next[root][i] == -1)
+                next[root][i] = root;
+            else{
+                fail[next[root][i]] = root;
+                Q.push(next[root][i]);
+            }
+        while(!Q.empty()){
+            int now = Q.front();
+            Q.pop();
+            for(int i = 0; i < 26; i++)
+                if(next[now][i] == -1)
+                    next[now][i] = next[fail[now]][i];
+                else{
+                    fail[next[now][i]] = next[fail[now]][i];
+                    Q.push(next[now][i]);
+                }
+        }
+    }
+    int query(char* buf){
+    	int ans = 0;
+        int len = strlen(buf);
+        int now = root;
+        for(int i = 0; i < len; i++){
+            now = next[now][buf[i]-'a'];
+            int temp = now;
+            while(temp != root){
+            	ans += end[temp];
+            	end[temp] = 0;
+                temp = fail[temp];
+            }
+        }
+        return ans;
+    }
+
+};
+
+Trie ac;
+char s[maxn];
+
+int main(){
+	int T; scanf("%d", &T);
+	while(T--){
+		int n; scanf("%d", &n);
+		ac.init();
+		for(int i = 0; i < n; ++i){
+			scanf("%s", s);
+			ac.insert(s);
+		}
+		ac.build();
+		scanf("%s", s);
+		printf("%d\n",ac.query(s));
+	}
+    return 0;
+}
+

@@ -1,0 +1,82 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+#define LL long long
+#define pii pair<int,int>
+
+const int INF = 0x3f3f3f3f;
+const int maxn = 2e4 + 3;
+
+vector<int> G[maxn];
+
+int p[2*maxn], dep[2*maxn], vis[2*maxn], id;
+
+void dfs(int u, int fa, int d){
+	vis[u] = id, p[id] = u, dep[id++] = d;
+	for(int i = 0; i < G[u].size(); ++i){
+		int v = G[u][i];
+		if(v == fa) continue;
+		dfs(v, u, d + 1);
+		vis[u] = min(vis[u], id), p[id] = u, dep[id++] = d;
+	}
+}
+
+int st[2*maxn][20];
+
+void rmq(){
+	for(int j = 0; (1 << j) < id; j++)
+		for(int i = 0; i < id; i++){
+			if(j == 0) st[i][j] = i;
+			else if(i+(1<<j)-1 < id){
+				st[i][j] = dep[st[i][j-1]] < dep[st[i+(1<<j-1)][j-1]] ? st[i][j-1]: st[i+(1<<j-1)][j-1];
+			}
+			else break;
+		}
+}
+
+int query(int l, int r){
+	int k = log2(double(r-l+1));
+	return dep[st[l][k]] < dep[st[r-(1<<k)+1][k]] ? st[l][k] : st[r-(1<<k)+1][k];
+}
+
+int deg[maxn], mx;
+
+int dfs2(int u, int fa){
+	for(int i = 0; i < G[u].size(); ++i){
+		int v = G[u][i];
+		if(v == fa) continue;
+		deg[u] += dfs2(v, u);
+	}
+	if(u != 1) mx = min(mx, deg[u] + 1);
+	return deg[u];
+}
+
+int main(){
+	int T; scanf("%d", &T);
+	for(int kase = 1; kase <= T; ++kase){
+		memset(deg, 0, sizeof(deg));
+		int n, m; scanf("%d%d", &n, &m);
+		for(int i = 1; i <= n; ++i) G[i].clear();
+		for(int i = 0; i < n - 1; ++i){
+			int u, v; scanf("%d%d", &u, &v);
+			G[u].push_back(v);
+			G[v].push_back(u);
+		}
+		id = 0;
+		dfs(1, -1, 0);
+		rmq();
+		for(int i = n - 1; i < m; ++i){
+			int u, v; scanf("%d%d", &u, &v);
+			++deg[u], ++deg[v];
+			int l = vis[u], r = vis[v];
+			if(l > r) swap(l, r);
+			int lca = p[query(l, r)];
+			deg[lca] -= 2;
+		}
+		mx = INF;
+		dfs2(1, -1);
+		printf("Case #%d: %d\n", kase, mx);
+	}
+    return 0;
+}

@@ -1,0 +1,90 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+#define LL long long
+#define pii pair<int,int>
+
+const int INF = 0x3f3f3f3f;
+const int maxn = 1e5 + 3;
+const int mod = 1e9 + 7;
+
+struct edge{
+	int v, nxt, w;
+}E[maxn<<1];
+
+int head[maxn], e;
+
+void addedge(int u, int v, int w){
+	E[e].v = v, E[e].w = w, E[e].nxt = head[u];
+	head[u] = e++;
+}
+
+int dep[maxn], w[maxn];
+int p[maxn][20];
+
+void dfs(int u, int fa = -1){
+	for(int i = head[u]; ~i; i = E[i].nxt){
+		int v = E[i].v;
+		if(v != fa){
+			p[v][0] = u;
+			w[v] = w[u] + E[i].w;
+			dep[v] = dep[u] + 1;
+			dfs(v, u);
+		}
+	}
+}
+
+int n;
+
+void getfa(){
+	for(int j = 1; (1 << j) <= n; ++j)
+		for(int i = 1; i <= n; ++i)
+			if(p[i][j-1] != -1){
+				p[i][j] = p[p[i][j-1]][j-1];
+			}
+}
+
+int LCA(int a, int b){
+	if(dep[a] < dep[b]) swap(a, b);
+	int i, j;
+	for(i = 0; (1 << i) <= dep[a]; ++i);
+	--i;
+	for(j = i; j >= 0; --j){
+		if(p[a][j] != -1 && dep[p[a][j]] >= dep[b])
+			a = p[a][j];
+	}
+	if(a == b) return a;
+	for(j = i; j >= 0; --j){
+		if(p[a][j] != p[b][j]){
+			a = p[a][j];
+			b = p[b][j];
+		}
+	}
+	return p[a][0];
+}
+
+int main(){
+	e = 0;
+	memset(head, -1, sizeof(head));
+	scanf("%d", &n);
+	for(int i = 0; i < n - 1; ++i){
+		int u, v; scanf("%d%d", &u, &v);
+		addedge(u, v, 1);
+		addedge(v, u, 0);
+	}
+	memset(p, -1, sizeof(p));
+	dfs(1);
+	getfa();
+	int m; scanf("%d", &m);
+	for(int i = 0; i < m; ++i){
+		int u, v; scanf("%d%d", &u, &v);
+		int lca = LCA(u, v);
+		if(w[u] == w[lca] && w[v] - w[lca] == dep[v] - dep[lca])
+			puts("Yes");
+		else puts("No");
+	}
+	return 0;
+}
+
+

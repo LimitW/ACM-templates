@@ -1,0 +1,78 @@
+#include <iostream>
+#include <cstring>
+#include <cstdio>
+#include <cstdlib>
+#include <cctype>
+#include <cmath>
+#include <string>
+#include <vector>
+#include <list>
+#include <map>
+#include <set>
+#include <queue>
+#include <stack>
+#include <utility>
+#include <bitset>
+#include <algorithm>
+
+using namespace std;
+
+#define LL long long
+#define pii pair<int,int>
+
+const int INF = 0x3f3f3f3f;
+const LL INFL = 0x3f3f3f3f3f3f3f3fLL;
+const int mod = 1e9 + 7;
+const int maxn = 1e5 + 3;
+const int maxm = 2e5 + 3;
+const double eps = 1e-9;
+
+int n, m;
+double a[1003][503];
+
+int gauss(){
+	for(int i = 0; i < n; ++i){
+		int r = i;
+		for(int j = i + 1; j < m; ++j)
+			if(fabs(a[j][i]) > fabs(a[r][i])) r = j;
+		if(fabs(a[r][i]) < eps) return 1;
+		if(r != i)
+			for(int j = 0; j < n + 1; ++j) swap(a[r][j],a[i][j]);
+		for(int j = i + 1; j < m; ++j){
+			double t = a[j][i] / a[i][i];
+			for(int k = i; k <= n; ++k)
+				a[j][k] -=  t * a[i][k];
+		}
+	}
+	for(int i = 0; i < m; ++i){
+		bool zero = 1;
+		for(int j = 0; j < n; ++j)
+			if(fabs(a[i][j]) > eps){
+				zero = 0;
+				break;
+			}
+		if(zero && fabs(a[i][n]) > eps) return -1;
+	}
+	for(int i = n - 1; i >= 0; --i){
+		for(int j = i + 1; j < n; ++j)
+			a[i][n] -= a[j][n] * a[i][j];
+		a[i][n] /= a[i][i];
+	}
+	return 0;
+}
+
+int main(){
+	while(~scanf("%d%d", &n, &m)){
+		for(int i = 0; i < m; ++i)
+			for(int j = 0; j < n + 1; ++j)
+				scanf("%lf", &a[i][j]);
+		int res = gauss();
+		if(res == -1) puts("No solutions");
+		else if(res == 1) puts("Many solutions");
+		else {
+			for(int i = 0; i < n; ++i)
+				printf("%d\n", (int)(a[i][n]+0.5));
+		}
+	}
+	return 0;
+}

@@ -1,0 +1,89 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+#define LL long long
+#define pii pair<int,int>
+
+const int INF = 0x3f3f3f3f;
+const LL INFL = 0x3f3f3f3f3f3f3f3fLL;
+const int mod = 1e9 + 7;
+const int maxn = 1e5 + 3;
+const int maxm = 2e5 + 3;
+
+int n;
+
+int a[maxn], b[maxn];
+
+LL Mergesort(int l, int r){
+	if(l == r) return 0;
+	LL cnt = 0;
+	int mid = l + r >> 1;
+	cnt += Mergesort(l, mid);
+	cnt += Mergesort(mid + 1, r);
+	int i = l, j = mid + 1, tmp = l;
+	for(; i <= mid && j <= r; ){
+		if(a[i] > a[j]){
+			b[tmp++] = a[j++];
+			cnt += (LL)(mid - i + 1);
+		}
+		else b[tmp++] = a[i++];
+	}
+	for(; i <= mid; ++i)
+		b[tmp++] = a[i];
+	for(; j <= r; ++j)
+		b[tmp++] = a[j];
+	for(int i = l; i <= r; ++i)
+		a[i] = b[i];
+	return cnt;
+}
+
+LL C[maxn];
+int SIZE = maxn;
+
+int lowbit(int x){
+	return x & -x;
+}
+
+void update(int x){
+	while(x < SIZE){
+		C[x]++;
+		x += lowbit(x);
+	}
+}
+
+LL query(int x){
+	LL ans = 0;
+	while(x > 0){
+		ans += C[x];
+		x -= lowbit(x);
+	}
+	return ans;
+}
+
+map<int,int> mp;
+
+int main(){
+	while(~scanf("%d", &n)){
+		LL cnt = 0;
+		memset(C, 0, sizeof(C));
+		for(int i = 1; i <= n; ++i){
+			scanf("%d", &a[i]);
+			b[i] = a[i];
+		}
+		SIZE = n + 2;
+		mp.clear();
+		sort(a + 1, a + n + 1);
+		for(int i = 1; i <= n; ++i){
+			mp[a[i]] = i;
+		}
+		for(int i = 1; i <= n; ++i){
+			update(mp[b[i]]);
+			cnt += query(n+1) - query(mp[b[i]]);
+		}
+		cout << cnt << '\n';
+		//cout << Mergesort(0,n-1) << '\n';
+	}
+    return 0;
+}
+
