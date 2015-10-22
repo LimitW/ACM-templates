@@ -1,0 +1,47 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+const int maxn = 1e6 + 10;
+
+int n;
+char s[maxn];
+char Manacher_s[maxn<<1];
+int p[maxn<<1];//p[i]为以i为中心的回文串半径长
+
+void Manacher(){
+	int i, id, maxlen = 0;
+	for(i = 1; i < n; ++i){
+		//左项关于id的对称点，右项id右边界
+		if(maxlen > i) p[i] = min(p[(id<<1)-i], p[id] + id - i);
+		else p[i] = 1;
+		for(; Manacher_s[i + p[i]] == Manacher_s[i - p[i]]; p[i]++);
+		//回文串可覆盖的最远右边界为maxlen，该回文串中心为id
+		if(p[i] + i > maxlen){
+			id = i;
+			maxlen = p[i] + i;
+		}
+	}
+}
+
+int main(){
+	int T; cin >> T;
+	while(T--){
+		cin >> s;
+		//防越界，i=1，p[i]=1时的延伸
+        Manacher_s[0] = '$';
+        Manacher_s[1] = '#';
+		for(int i = 0; s[i]; ++i){
+			Manacher_s[(i<<1)+2] = s[i];
+			Manacher_s[(i<<1)+3] = '#';
+		}
+		n = (strlen(s)<<1) + 2;
+		Manacher();
+		int ans = 0;
+		for(int i = 0; i < n; ++i)
+			ans = max(ans, p[i]);
+		cout << ans - 1 << '\n';
+	}
+	return 0;
+}
+

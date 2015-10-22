@@ -1,0 +1,60 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+const int maxn = 500 + 3;
+
+int a[maxn], b[maxn];
+int dp[maxn][maxn], pre[maxn][maxn];
+
+int main(){
+	memset(dp, 0, sizeof(dp));
+	memset(pre, -1, sizeof(pre));
+	int T; scanf("%d", &T);
+	while(T--){
+		int n; scanf("%d", &n);
+		for(int i = 1; i <= n; ++i)
+			scanf("%d", a + i);
+		int m; scanf("%d", &m);
+		for(int i = 1; i <= m; ++i)
+			scanf("%d", b + i);
+		for(int i = 1; i <= n; ++i){
+			int f = 0, tmp = -1;
+			for(int j = 1; j <= m; ++j){
+				dp[i][j] = dp[i-1][j];
+				if(a[i] > b[j] && f < dp[i-1][j]){
+					f = dp[i-1][j];
+					tmp = j;
+				}
+				else if(a[i] == b[j]){
+					dp[i][j] = f + 1;
+					pre[i][j] = tmp;
+				}
+			}
+		}
+		int ans = 0, p = -1;
+		for(int i = 1; i <= m; ++i){
+			if(dp[n][i] > ans){
+				ans = dp[n][i], p = i;
+			}
+		}
+		if(ans == 0) puts("0");
+		else{
+			vector<int> lcis;
+			lcis.clear();
+			for(int i = n; i > 0 && p != -1; --i){
+				if(a[i] == b[p]){
+					lcis.push_back(a[i]);
+					p = pre[i][p];
+				}
+			}
+			printf("%d\n", ans);
+			for(int i = lcis.size() - 1; i >= 0; --i){
+				printf("%d%c", lcis[i], i?' ':'\n');
+			}
+		}
+		if(T) puts("");
+	}
+	return 0;
+}
+
